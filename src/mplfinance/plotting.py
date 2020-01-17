@@ -97,6 +97,11 @@ def _valid_kwargs_table():
                           'Implemented' : True,
                           'Validator'   : lambda value: isinstance(value,dict) or (isinstance(value,list) and all([isinstance(d,dict) for d in value])) },
  
+        'savefig'     : { 'Default'     : None, 
+                                          
+                          'Implemented' : True,
+                          'Validator'   : lambda value: isinstance(value,dict) or isinstance(value,str) },
+ 
     }
     # Check that we didn't make a typo in any of the things above:
     #  that should otherwise be the same for all kwags:
@@ -255,14 +260,11 @@ def plot( data, **kwargs ):
     if mavgs is not None:
         if isinstance(mavgs,int):
             mavgs = mavgs,      # convert to tuple 
-        if len(mavgs) > 3:
-            mavgs = mavgs[0:3]  # take at most 3
-        mavcolors=['turquoise','magenta','gold']
-        jj = 0
+        if len(mavgs) > 7:
+            mavgs = mavgs[0:7]  # take at most 7
         for mav in mavgs:
-            mavprices = data['Close'].rolling(mav).mean().values            
-            ax1.plot(xdates, mavprices, color=mavcolors[jj])
-            jj+=1
+            mavprices = data['Close'].rolling(mav).mean().values 
+            ax1.plot(xdates, mavprices)
 
     avg_dist_between_points = (xdates[-1] - xdates[0]) / float(len(xdates))
     minx = xdates[0]  - avg_dist_between_points
@@ -355,7 +357,14 @@ def plot( data, **kwargs ):
         vol_label = 'Volume x '+str(offset)
         ax2.set_ylabel(vol_label,size='x-large',weight='semibold')
 
-    plt.show()
+    if config['savefig'] is not None:
+        save = config['savefig']
+        if isinstance(save,dict):
+            plt.savefig(**save)
+        else:
+            plt.savefig(save)
+    else:
+        plt.show()
 
 def _valid_addplot_kwargs_table():
 
